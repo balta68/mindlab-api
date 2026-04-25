@@ -92,14 +92,18 @@ declare const process: {
 
     const data = await openaiResponse.json();
 
-    const outputText = data.output_text;
+    const outputText =
+  data.output_text ||
+  data.output?.[0]?.content?.[0]?.text ||
+  data.output?.[0]?.content?.[0]?.json;
 
-    if (!outputText) {
-      return res.status(500).json({
-        error: 'No output_text returned',
-        raw: data,
-      });
-    }
+if (!outputText) {
+  return res.status(500).json({
+    error: 'No usable output returned',
+    raw: data,
+  });
+}
+
 
     const experiment = JSON.parse(outputText);
 
