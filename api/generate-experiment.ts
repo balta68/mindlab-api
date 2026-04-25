@@ -1,4 +1,8 @@
-export default async function handler(req: any, res: any) {
+declare const process: {
+  env: {
+    OPENAI_API_KEY?: string;
+  };
+};export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
