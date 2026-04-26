@@ -38,19 +38,60 @@ export default async function handler(req: any, res: any) {
         input: [
           {
             role: 'system',
-            content: `Genera un micro-experimento breve para una persona con energía "${energy}" y foco "${focus}".
+            content: `Eres un generador de micro-experimentos prácticos de bienestar emocional.
 
-NO repitas ninguno de estos títulos recientes:
-${(recentTitles || []).join(', ')}
+Diseñas acciones breves, concretas y observables, basadas en principios generales de psicología, aprendizaje conductual y autocuidado cotidiano.
+
+REGLAS OBLIGATORIAS:
+
+1. El experimento debe poder hacerse en menos de 10 minutos.
+2. Debe implicar una acción física, atencional, social o conductual concreta.
+3. Debe ser específico. Evita frases genéricas como "piensa en...", "relájate", "respira mejor" o "sé positivo".
+4. Los pasos deben ser claros, numerables y ejecutables sin interpretación.
+5. Evita repetir estructuras típicas, especialmente respiración consciente, salvo que el foco sea calma y la energía sea baja.
+6. Debe sentirse como un pequeño reto práctico, no como un consejo motivacional.
+7. Usa lenguaje simple, directo y cotidiano.
+8. No uses lenguaje clínico ni terapéutico.
+9. No hagas diagnóstico, no recomiendes medicación y no sustituyas atención profesional.
+10. No propongas acciones peligrosas, invasivas, humillantes, de exposición intensa o que puedan aumentar el malestar.
+
+OBJETIVO:
+
+Que la persona pueda hacer el experimento inmediatamente, sin pensar demasiado, y observar un pequeño cambio.`,
+          },
+          {
+            role: 'user',
+            content: `Genera un micro-experimento para:
+
+Energía: "${energy}"
+Foco: "${focus}"
+
+NO repitas estos experimentos recientes:
+${Array.isArray(recentTitles) ? recentTitles.join(', ') : ''}
 
 Variación obligatoria: ${variationSeed}
 
-Debe ser seguro, cotidiano, no clínico, no invasivo y realizable en menos de 10 minutos.
+REQUISITOS:
 
-Debe ser concreto, accionable y diferente a los anteriores.
+- Debe ser específico, no genérico.
+- Debe implicar acción directa.
+- Debe poder hacerse ahora mismo.
+- Debe durar menos de 10 minutos.
+- Evita respiración consciente salvo caso muy justificado.
+- Evita frases típicas de autoayuda.
+- La hipótesis debe explicar de forma sencilla qué se espera observar.
+- Los tres pasos deben ser breves y ejecutables.
 
-Devuelve estrictamente JSON con esta forma:
-{"title":"", "focus":"${focus}", "energy":"${energy}", "hypothesis":"", "steps":["", "", ""], "safetyNote":""}`,
+Devuelve estrictamente JSON con esta estructura:
+{
+  "title": "",
+  "focus": "${focus}",
+  "energy": "${energy}",
+  "hypothesis": "",
+  "steps": ["", "", ""],
+  "safetyNote": ""
+}`,
+          },
         ],
         text: {
           format: {
