@@ -17,7 +17,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { energy, focus } = req.body || {};
+  const { energy, focus, recentTitles } = req.body || {};
 
   if (!process.env.OPENAI_API_KEY) {
     return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
@@ -38,22 +38,19 @@ export default async function handler(req: any, res: any) {
         input: [
           {
             role: 'system',
-            content:
-              'Eres un generador de micro-experimentos diarios de bienestar emocional. Usas principios generales de psicología, neurociencia y experimentos conductuales de la terapia cognitivo-conductual, pero no haces diagnóstico, no das tratamiento médico, no sustituyes terapia y no propones acciones peligrosas. Generas ejercicios cotidianos, breves, seguros y no invasivos. Devuelve siempre solo JSON válido.',
-          },
-          {
-            role: 'user',
             content: `Genera un micro-experimento breve para una persona con energía "${energy}" y foco "${focus}".
+
+NO repitas ninguno de estos títulos recientes:
+${(recentTitles || []).join(', ')}
 
 Variación obligatoria: ${variationSeed}
 
 Debe ser seguro, cotidiano, no clínico, no invasivo y realizable en menos de 10 minutos.
 
-No repitas respiración consciente salvo que el foco sea calma y la energía sea baja. Evita repetir títulos o pasos genéricos.
+Debe ser concreto, accionable y diferente a los anteriores.
 
 Devuelve estrictamente JSON con esta forma:
 {"title":"", "focus":"${focus}", "energy":"${energy}", "hypothesis":"", "steps":["", "", ""], "safetyNote":""}`,
-          },
         ],
         text: {
           format: {
