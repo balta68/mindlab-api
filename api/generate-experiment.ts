@@ -2,7 +2,9 @@ declare const process: {
   env: {
     OPENAI_API_KEY?: string;
   };
-};export default async function handler(req: any, res: any) {
+};
+
+export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,6 +23,8 @@ declare const process: {
     return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
   }
 
+  const variationSeed = Math.random().toString(36).slice(2);
+
   try {
     const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
@@ -30,15 +34,25 @@ declare const process: {
       },
       body: JSON.stringify({
         model: 'gpt-4.1-mini',
+        temperature: 0.9,
         input: [
           {
             role: 'system',
             content:
-              'Eres un generador de micro-experimentos diarios de bienestar emocional y salud mental. Te basas en los conocimientos de la neurociencia y también en el conocimiento acumulqdo sobre los experimentos conductuales de la terapia cognitivo conductual. No haces diagnóstico pero orientas como psicólogo clínico que eres, no das tratamiento médico, no sustituyes terapia y no propones acciones peligrosas. Devuelve siempre solo JSON válido.',
+              'Eres un generador de micro-experimentos diarios de bienestar emocional. Usas principios generales de psicología, neurociencia y experimentos conductuales de la terapia cognitivo-conductual, pero no haces diagnóstico, no das tratamiento médico, no sustituyes terapia y no propones acciones peligrosas. Generas ejercicios cotidianos, breves, seguros y no invasivos. Devuelve siempre solo JSON válido.',
           },
           {
             role: 'user',
-            content: `Genera un micro-experimento breve para una persona con energía "${energy}" y foco "${focus}". Debe ser seguro, cotidiano, no clínico, no invasivo, y realizable en menos de 10 minutos. Devuelve estrictamente JSON con esta forma: {"title":"", "focus":"${focus}", "energy":"${energy}", "hypothesis":"", "steps":["", "", ""], "safetyNote":""}`,
+            content: `Genera un micro-experimento breve para una persona con energía "${energy}" y foco "${focus}".
+
+Variación obligatoria: ${variationSeed}
+
+Debe ser seguro, cotidiano, no clínico, no invasivo y realizable en menos de 10 minutos.
+
+No repitas respiración consciente salvo que el foco sea calma y la energía sea baja. Evita repetir títulos o pasos genéricos.
+
+Devuelve estrictamente JSON con esta forma:
+{"title":"", "focus":"${focus}", "energy":"${energy}", "hypothesis":"", "steps":["", "", ""], "safetyNote":""}`,
           },
         ],
         text: {
@@ -84,6 +98,7 @@ declare const process: {
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
+
       return res.status(500).json({
         error: 'OpenAI request failed',
         details: errorText,
@@ -92,22 +107,20 @@ declare const process: {
 
     const data = await openaiResponse.json();
 
-  const outputText =
-  data.output_text ||
-  data.output?.[0]?.content?.[0]?.text ||
-  data.output?.[0]?.content?.[0]?.json;
+    const outputText =
+      data.output_text ||
+      data.output?.[0]?.content?.[0]?.text ||
+      data.output?.[0]?.content?.[0]?.json;
 
-if (!outputText) {
-  return res.status(500).json({
-    error: 'No usable output returned',
-    raw: data,
-  });
-}
+    if (!outputText) {
+      return res.status(500).json({
+        error: 'No usable output returned',
+        raw: data,
+      });
+    }
 
-const experiment =
-  typeof outputText === 'string' ? JSON.parse(outputText) : outputText;
-
-    const experiment = JSON.parse(outputText);
+    const experiment =
+      typeof outputText === 'string' ? JSON.parse(outputText) : outputText;
 
     return res.status(200).json(experiment);
   } catch (error: any) {
