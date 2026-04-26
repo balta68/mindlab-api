@@ -92,7 +92,7 @@ declare const process: {
 
     const data = await openaiResponse.json();
 
-    const outputText =
+  const outputText =
   data.output_text ||
   data.output?.[0]?.content?.[0]?.text ||
   data.output?.[0]?.content?.[0]?.json;
@@ -104,6 +104,8 @@ if (!outputText) {
   });
 }
 
+const experiment =
+  typeof outputText === 'string' ? JSON.parse(outputText) : outputText;
 
     const experiment = JSON.parse(outputText);
 
